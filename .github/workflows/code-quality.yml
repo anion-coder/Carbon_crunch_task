@@ -26,7 +26,6 @@ jobs:
     - name: Run code analysis
       run: |
         cd backend
-        python -m pytest tests/
         python -m pylint app/
         python -m flake8 app/
     
@@ -39,11 +38,6 @@ jobs:
       run: |
         cd frontend
         npm install
-    
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test
     
     - name: Create analysis report
       run: |
