@@ -1,0 +1,10 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+pylint==3.0.2
+radon==6.0.1
+flake8==6.1.0
+pytest==7.4.3
+python-jose==3.3.0
+pydantic==2.4.2 
+esprima==4.0.1
