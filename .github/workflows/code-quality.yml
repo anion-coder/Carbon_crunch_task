@@ -1,0 +1,79 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+    
+    - name: Install Python dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run code analysis
+      run: |
+        cd backend
+        python -m pytest tests/
+        python -m pylint app/
+        python -m flake8 app/
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Node.js dependencies
+      run: |
+        cd frontend
+        npm install
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test
+    
+    - name: Create analysis report
+      run: |
+        echo "Code Quality Analysis Report" > report.md
+        echo "==========================" >> report.md
+        echo "" >> report.md
+        echo "### Backend Analysis" >> report.md
+        echo "" >> report.md
+        python -m pylint app/ --output-format=text >> report.md
+        echo "" >> report.md
+        echo "### Frontend Analysis" >> report.md
+        echo "" >> report.md
+        cd frontend && npm run lint >> ../report.md
+    
+    - name: Upload analysis report
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-quality-report
+        path: report.md
+    
+    - name: Comment PR
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('report.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          }); 
